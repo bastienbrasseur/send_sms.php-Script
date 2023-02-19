@@ -17,12 +17,17 @@ if ($_GET['uniquetoken'] == '4dc2a823-179e-463c-9fb1-6f221d9d90e4')
 		}
 
 		// on récupère les infos du client via l'adresse email 
-		$req  = "SELECT CustomerPhoneNumber,Gender,CustomerLastName,CustomerFirstName FROM customers WHERE CustomerEmail = '$email'";
+		$req  = "SELECT CustomerPhoneNumber,Gender,CustomerLastName,CustomerFirstName,Renewal_SMS FROM customers WHERE CustomerEmail = '$email'";
 		$result = $conn->query($req);
 		while($row = $result->fetch_assoc()) {
 				
 				$CustomerPhoneNumber = $row["CustomerPhoneNumber"];
 				$CustomerName = $row["CustomerLastName"] . " " . $row["CustomerFirstName"];
+				
+				if ($row["Renewal_SMS"] == 'false'){ // si on indique que le client ne veux pàas recevoir de sms on arrete le script
+					exit();
+					
+				}
 				
 				if ($row["Gender"] == "Madame") { 
 						$Gender = "Chère cliente";
@@ -38,9 +43,9 @@ if ($_GET['uniquetoken'] == '4dc2a823-179e-463c-9fb1-6f221d9d90e4')
 			
 		
 
-		$message = $Gender . ', un avis de renouvellement de votre abonnement internet Be Cactus contenant un lien de paiement vous a été envoyé par email à l\'adresse '.$email.'. Si vous avez choisi la domiciliation, vous n\'avez rien à faire. Merci. L\'équipe Be Cactus. 0800/370.40';
+		$message = $Gender . ', un avis de renouvellement de votre abonnement internet Be Cactus contenant un lien de paiement vous a été envoyé par email à l\'adresse '.$email.'. Vous pouvez également opter pour le paiement automatique, contactez-nous. Merci. L\'équipe Be Cactus. 0800/370.40';
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, 'https://api.smsfactor.com/send?text='.$message.'&to='. $CustomerPhoneNumber .'&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDE0OSIsImlhdCI6MTY2Nzg5NzYyNC40NDE0Mzh9.6DIe9ntfCtpjmnrSHoHTmckpm1eB56Y3zsZd4qFoSIk');
+		curl_setopt($ch, CURLOPT_URL, 'https://api.smsfactor.com/send?text='.$message.'&to='. $CustomerPhoneNumber .'&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDE0OSIsImlhdCI6MTY3MjQ5NjMwNy4zOTUxOTh9.FxFaVv75-6xePEC9vuiupsyZVacqsPvKtfO5FqKzyYU');
 		curl_setopt($ch, CURLOPT_HEADER, 0);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		$result = curl_exec($ch);
